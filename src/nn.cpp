@@ -1,6 +1,3 @@
-
-#include <Rcpp.h>
-#include <ANN/ANN.h>     // ANN library header
 #include "WANN.h"
 
 using namespace Rcpp;
