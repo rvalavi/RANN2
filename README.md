@@ -107,7 +107,7 @@ Developers can directly include them in their C++ code / Rcpp based package.
 ```
 Your `C++` file: 
 ```C
-    #include <ANN.h>
+    #include <ANN/ANN.h>
 ```
     
 For usage example: [src/nn.cpp](https://github.com/jefferis/RANN2/blob/master/src/nn.cpp)
