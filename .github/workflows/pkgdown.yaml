@@ -32,7 +32,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          extra-packages: any::pkgdown, local::., any::ggplot2, any::rgl, any::knitr, any::microbenchmark, any::plyr
           needs: website
 
       - name: Build site
