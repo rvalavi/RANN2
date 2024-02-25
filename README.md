@@ -105,9 +105,29 @@ Developers can directly include them in their C++ code / Rcpp based package.
 
     PKG_CPPFLAGS+=-DDLL_EXPORTS
 ```
-Your `C++` file: 
+Your `C++` file (e.g. `src/mycodeusingANN.cpp`) will typically start: 
 ```C
     #include <ANN/ANN.h>
+    #include <Rcpp.h>
+    using namespace Rcpp;
 ```
     
+[Here](https://github.com/caiohamamura/MeanShiftR/blob/RANN2/) is an example of linking to RANN2 and using the base ANN library. See in particular 
+
+    * [DESCRIPTION](https://github.com/caiohamamura/MeanShiftR/blob/RANN2/DESCRIPTION)
+    * [src/MeanShift_Classical.cpp](https://github.com/caiohamamura/MeanShiftR/blob/RANN2/src/MeanShift_Classical.cpp)
+
+#### Using WANN from RCpp 
+
+As already noted the WANN C++ class wraps ANN and provides some 
+additional functionality for RCpp users. You can use this from RCpp code in your
+own project by following the step above but the start of your C++ file will look
+slightly different. 
+
+Your `C++` file (e.g. `src/mycodeusingWANN.cpp`) will typically start: 
+```C
+    #include "WANN.h"
+    using namespace Rcpp;
+```
+
 For usage example: [src/nn.cpp](https://github.com/jefferis/RANN2/blob/master/src/nn.cpp)
