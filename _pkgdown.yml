@@ -1,1 +1,4 @@
-destination: docs
+url: http://jefferis.github.io/RANN2/
+template:
+  bootstrap: 5
+
