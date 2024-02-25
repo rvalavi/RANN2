@@ -3,13 +3,10 @@
 \docType{package}
 \name{RANN2-package}
 \alias{RANN2-package}
-\alias{_PACKAGE}
 \alias{RANN2}
 \title{RANN2: Fast Nearest Neighbour Search ('Rcpp' Wrapper of 'Arya' and Mount's 'libANN')}
 \description{
-Finds the k nearest neighbours for every point in a given dataset
-    in O(N log N) time using 'Arya' and Mount's 'ANN' library (v1.1.3). This wrapper
-    uses 'Rcpp' to simplify access compared with the original 'RANN' package.
+Finds the k nearest neighbours for every point in a given dataset in O(N log N) time using 'Arya' and Mount's 'ANN' library (v1.1.3). This wrapper uses 'Rcpp' to simplify access compared with the original 'RANN' package.
 }
 \seealso{
 \code{\link{nn2}}
@@ -27,8 +24,7 @@ Other contributors:
 \itemize{
   \item Caio Hamamura (\href{https://orcid.org/0000-0001-6149-5885}{ORCID}) [contributor]
   \item Jurian Baas (\href{https://orcid.org/0000-0001-8689-8824}{ORCID}) [contributor]
-  \item University of Maryland (ANN library is copyright University of Maryland and Sunil Arya and
-    David Mount. See file COPYRIGHT for details) [copyright holder]
+  \item University of Maryland (ANN library is copyright University of Maryland and Sunil Arya and David Mount. See file COPYRIGHT for details) [copyright holder]
 }
 
 }
