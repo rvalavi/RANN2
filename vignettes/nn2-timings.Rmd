@@ -13,41 +13,88 @@ on real world data for Drosophila neurons
 Since the data are large, they are not distributed with the package
 but may be obtained on request.
 
-```{r options, include=FALSE}
+```{r options}
 # only run locally - this vignette takes a long time and
 # currently relies on some large (50 Mb) sample data.
-knitr::opts_chunk$set(eval=nzchar(Sys.getenv("RUN_RANN2_VIGNETTES")))
+runv=nzchar(Sys.getenv("RUN_RANN2_VIGNETTES"))
+knitr::opts_chunk$set(eval=runv)
 ```
 
 The data used here 
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, eval=runv}
 library(knitr)
-library(nat)
 rgl::setupKnitr()
 library(microbenchmark)
 library(RANN2)
 library(plyr)
-dps=readRDS("~/projects/ChiangReanalysis/data/dpscanon.rds")
+library(ggplot2)
+library(rgl)
 ```
 
-```{r sample}
+Read in some public data and prepare a sample of 500 neurons with XYZ coordinates
+```{r, eval=FALSE}
+tf=tempfile(fileext = 'dpscanon.rds')
+download.file("http://virtualflybrain.org/data/VFB/nblast/flycircuit/dpscanon.rds", destfile = tf)
+dps=readRDS(tf)
 set.seed(42)
-s=sample(dps,500)
-library(nat.nblast)
-np=neuron_pairs(s, n = 500)
-sl=sapply(s, function(x) nrow(x$points))
+dps500=sample(dps,500)
+saveRDS(dps500, file='dps500.rds')
+unlink(tf)
+```
+
+OK now we're going to use that canned sample
+```{r, eval=runv}
+tf2=tempfile(fileext = 'dps500.rds')
+download.file("https://github.com/jefferis/RANN2/releases/download/v0.12pre/dps500.rds", destfile = tf2)
+dps500=readRDS(tf2)
+unlink(tf2)
+```
+
+
+Define a utility function borrowed from the nat.nblast package:
+
+```{r, eval=runv}
+neuron_pairs <- function (query, target, n = NA, ignoreSelf = TRUE) 
+{
+    if (!is.character(query)) 
+        query = names(query)
+    if (missing(target)) 
+        target = query
+    else if (!is.character(target)) 
+        target = names(target)
+    if (is.na(n)) {
+        rval = expand.grid(query = query, target = target, stringsAsFactors = FALSE, 
+            KEEP.OUT.ATTRS = FALSE)
+        if (ignoreSelf) 
+            rval <- rval[rval$target != rval$query, ]
+        return(rval)
+    }
+    remove_self = ignoreSelf && any(query %in% target)
+    q = sample(query, n, replace = TRUE)
+    t = sapply(q, function(z) sample(if (remove_self) 
+        setdiff(target, z)
+    else target, 1))
+    data.frame(query = q, target = t, stringsAsFactors = F)
+}
+```
+
+
+
+```{r sample, eval=runv}
+np=neuron_pairs(dps500, n = 500)
+sl=sapply(dps500, function(x) nrow(x$points))
 np$query.len=sl[np$query]
 np$target.len=sl[np$target]
 ```
 
 Let's investigate the build time for the kdtree of those neurons
-```{r buildtime, cache=TRUE}
+```{r buildtime, cache=TRUE, eval=runv}
 times=llply(np$target, function(n)
-  microbenchmark(nn2(s[[n]]$points,matrix(0,ncol=3,nrow=1), k=1), times = 20))
+  microbenchmark(nn2(dps500[[n]]$points,matrix(0,ncol=3,nrow=1), k=1), times = 20))
 ```
 
-```{r model-buildtimes, message=FALSE}
+```{r model-buildtimes, message=FALSE, eval=runv}
 np$target.time=sapply(times,function(x) median(x$time)/1e6)
 library(ggplot2)
 qplot(target.len,target.time, data=np, ylab='Tree build time /ms') + 
@@ -61,22 +108,22 @@ So in conclusion, ~ 0.5 ms / 1000 points to build.
 For queries, total time will include build time, + query time depending O(n)
 on number of query points and O(n log n) on number of target points.
 
-```{r searchtime, cache=TRUE}
+```{r searchtime, cache=TRUE, eval=runv}
 times2=mlply(np, function(query, target, ...)
-  microbenchmark(nn2(s[[target]]$points,s[[query]]$points, k=1), times = 20))
+  microbenchmark(nn2(dps500[[target]]$points,dps500[[query]]$points, k=1), times = 20))
 np$search.time=sapply(times2,function(x) median(x$time)/1e6)
 ```
 
-```{r plot-searchtime, fig.width=7, fig.height=6, webgl=TRUE}
+```{r plot-searchtime, fig.width=7, fig.height=6, webgl=TRUE, eval=runv}
 with(np, plot3d(log2(query.len), log2(target.len), log2(search.time)))
 ```
 
-```{r plot-searchtime-1-neuron}
+```{r plot-searchtime-1-neuron, eval=runv}
 set.seed(421)
-s20=sample(s, 20)
-times3=llply(s20, function(query, ...)
-  microbenchmark(nn2(s20[[1]]$points,query$points, k=1), times = 20))
-df=data.frame(query=names(s20),target= names(s20)[1], stringsAsFactors = F)
+dps20=sample(dps500, 20)
+times3=llply(dps20, function(query, ...)
+  microbenchmark(nn2(dps20[[1]]$points,query$points, k=1), times = 20))
+df=data.frame(query=names(dps20),target= names(dps20)[1], stringsAsFactors = F)
 df$search.time=sapply(times3,function(x) median(x$time)/1e6)
 df$query.len=sl[df$query]
 qplot(query.len, search.time, data=df, ylab='Query time /ms') +
@@ -86,12 +133,10 @@ l=lm(search.time~query.len, data=df)
 
 Slope is `r l$coefficients[2]`.
 
-```{r plot-searchtime-1-neuron-target}
-set.seed(421)
-s20=sample(s, 20)
-np40=neuron_pairs(s20[1:2],s20)
+```{r plot-searchtime-1-neuron-target, eval=runv}
+np40=neuron_pairs(dps20[1:2],dps20)
 times4=mlply(np40, function(target, query, ...)
-  microbenchmark(nn2(s20[[target]]$points, s20[[query]]$points, k=1), times = 20))
+  microbenchmark(nn2(dps20[[target]]$points, dps20[[query]]$points, k=1), times = 20))
 
 np40$search.time=sapply(times4,function(x) median(x$time)/1e6)
 np40$target.len=sl[np40$target]
