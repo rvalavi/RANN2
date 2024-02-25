@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // nn2_cpp
 List nn2_cpp(NumericMatrix data, NumericMatrix query, const int k, const double eps, const double radius);
 RcppExport SEXP _RANN2_nn2_cpp(SEXP dataSEXP, SEXP querySEXP, SEXP kSEXP, SEXP epsSEXP, SEXP radiusSEXP) {
