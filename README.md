@@ -3,6 +3,7 @@
 [![Docs](https://img.shields.io/badge/docs-100%25-brightgreen.svg)](https://jefferis.github.io/RANN2/)
 [![Build Status](https://travis-ci.org/jefferis/RANN2.svg)](https://travis-ci.org/jefferis/RANN2)
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
+[![R-CMD-check](https://github.com/jefferis/RANN2/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jefferis/RANN2/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 This package is an updated version of the [RANN](https://cran.r-project.org/package=RANN) 
