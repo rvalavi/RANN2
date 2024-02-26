@@ -105,6 +105,7 @@ library(ggplot2)
 ggplot(np, aes(target.len,target.time)) +
   scale_x_log10() + 
   scale_y_log10('Tree build time /ms') +
+  geom_point() + 
   geom_smooth()
 l=lm(target.time~target.len, data=np)
 l$coefficients[2]
@@ -135,6 +136,7 @@ df$search.time=sapply(times3,function(x) median(x$time)/1e6)
 df$query.len=sl[df$query]
 ggplot(data=df, aes(query.len, search.time)) +
   scale_y_continuous('Query time /ms') +
+  geom_point() + 
   geom_smooth(method = 'lm')
 l=lm(search.time~query.len, data=df)
 ```
@@ -151,6 +153,7 @@ np40$target.len=sl[np40$target]
 np40$query.len=sl[np40$query]
 ggplot(np40, aes(target.len, search.time)) +
   scale_y_continuous('Query time /ms') +
+  geom_point() +
   geom_smooth(method = 'lm')
 l=lm(search.time~target.len, data=np40)
 ```
