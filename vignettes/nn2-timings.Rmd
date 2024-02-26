@@ -10,17 +10,17 @@ This vignette gives some indication of how kd build and query times
 vary with the length of the query, target input data. These are based
 on real world data for Drosophila neurons 
 (see [Costa et al 2016](https://doi.org/10.1016/j.neuron.2016.06.012)).
-Since the data are large, they are not distributed with the package
-but may be obtained on request.
+Since the source data are large (>16000 neurons) we have prepared a smaller 
+random sample.
 
-```{r options}
-# only run locally - this vignette takes a long time and
-# currently relies on some large (50 Mb) sample data.
+```{r options, include=FALSE}
+# control whether to run - this vignette takes a long time and
+# downloads some large (50 Mb) sample data.
 runv=nzchar(Sys.getenv("RUN_RANN2_VIGNETTES"))
 knitr::opts_chunk$set(eval=runv)
 ```
 
-The data used here 
+Load packages
 
 ```{r setup, message=FALSE, eval=runv}
 library(knitr)
@@ -32,7 +32,8 @@ library(ggplot2)
 library(rgl)
 ```
 
-Read in some public data and prepare a sample of 500 neurons with XYZ coordinates
+This is how we prepared the sample data:
+
 ```{r, eval=FALSE}
 tf=tempfile(fileext = 'dpscanon.rds')
 download.file("http://virtualflybrain.org/data/VFB/nblast/flycircuit/dpscanon.rds", destfile = tf)
@@ -43,7 +44,10 @@ saveRDS(dps500, file='dps500.rds')
 unlink(tf)
 ```
 
-OK now we're going to use that canned sample
+OK now we're going to use that canned sample. It has been made available by a
+github release. This allows it to be downloaded directly (rather than bloating
+the git repository).
+
 ```{r, eval=runv}
 tf2=tempfile(fileext = 'dps500.rds')
 download.file("https://github.com/jefferis/RANN2/releases/download/v0.12pre/dps500.rds", destfile = tf2)
@@ -52,7 +56,7 @@ unlink(tf2)
 ```
 
 
-Define a utility function borrowed from the nat.nblast package:
+Here we define a utility function borrowed from the nat.nblast package:
 
 ```{r, eval=runv}
 neuron_pairs <- function (query, target, n = NA, ignoreSelf = TRUE) 
@@ -80,6 +84,7 @@ neuron_pairs <- function (query, target, n = NA, ignoreSelf = TRUE)
 ```
 
 
+Choosee 
 
 ```{r sample, eval=runv}
 np=neuron_pairs(dps500, n = 500)
@@ -97,8 +102,10 @@ times=llply(np$target, function(n)
 ```{r model-buildtimes, message=FALSE, eval=runv}
 np$target.time=sapply(times,function(x) median(x$time)/1e6)
 library(ggplot2)
-qplot(target.len,target.time, data=np, ylab='Tree build time /ms') + 
-  scale_x_log10()+scale_y_log10()+geom_smooth()
+ggplot(np, aes(target.len,target.time)) +
+  scale_x_log10() + 
+  scale_y_log10('Tree build time /ms') +
+  geom_smooth()
 l=lm(target.time~target.len, data=np)
 l$coefficients[2]
 ```
@@ -126,7 +133,8 @@ times3=llply(dps20, function(query, ...)
 df=data.frame(query=names(dps20),target= names(dps20)[1], stringsAsFactors = F)
 df$search.time=sapply(times3,function(x) median(x$time)/1e6)
 df$query.len=sl[df$query]
-qplot(query.len, search.time, data=df, ylab='Query time /ms') +
+ggplot(data=df, aes(query.len, search.time)) +
+  scale_y_continuous('Query time /ms') +
   geom_smooth(method = 'lm')
 l=lm(search.time~query.len, data=df)
 ```
@@ -141,7 +149,8 @@ times4=mlply(np40, function(target, query, ...)
 np40$search.time=sapply(times4,function(x) median(x$time)/1e6)
 np40$target.len=sl[np40$target]
 np40$query.len=sl[np40$query]
-qplot(target.len, search.time, data=np40, ylab='Query time /ms') +
+ggplot(np40, aes(target.len, search.time)) +
+  scale_y_continuous('Query time /ms') +
   geom_smooth(method = 'lm')
 l=lm(search.time~target.len, data=np40)
 ```
